@@ -53,6 +53,7 @@ mypy src/
 
 - [Step-by-step setup and demo guide](docs/demo_guide.md)
 - [20-page project report PDF](docs/report/Advanced_Python_Dropout_Prediction_Report.pdf) and [editable source](docs/report/Advanced_Python_Dropout_Prediction_Report.md)
+- [10-slide Advanced Python presentation](docs/presentation/Dropout_Prediction_Advanced_Python_Presentation.pptx), [rehearsal and live-demo guide](docs/presentation/TechPulse_Dropout_Presentation_Rehearsal.md), and [slide-to-code evidence map](docs/presentation/slide_evidence_map.md)
 - [Concept map](docs/concept_map.md), [methodology](docs/methodology.md), [project design](docs/project_design.md) and [viva notes](docs/viva_preparation.md)
 - Genuine app screenshots are under `docs/report/screenshots/`.
 

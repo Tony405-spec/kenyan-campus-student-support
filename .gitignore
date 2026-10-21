@@ -13,4 +13,6 @@ data/processed/*
 outputs/*
 !outputs/README.md
 work/
+docs/presentation/.build/
+docs/presentation/output/
 
