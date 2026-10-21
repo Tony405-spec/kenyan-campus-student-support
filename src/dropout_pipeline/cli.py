@@ -7,6 +7,7 @@ import json
 import logging
 from pathlib import Path
 
+import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -54,6 +55,8 @@ def run_pipeline(config: PipelineConfig, download: bool = False) -> None:
     config.output_dir.mkdir(parents=True, exist_ok=True)
     comparison.to_csv(config.output_dir / "model_comparison.csv", index=False)
     best = max(results, key=lambda result: result.mean_macro_f1)
+    model_path = config.output_dir / "student_outcome_model.joblib"
+    joblib.dump(best.estimator, model_path)
     LOGGER.info("Starting %s stage", RunStage.EVALUATE.value)
     metrics = evaluate_selected(
         best.estimator, X_test, pd.Series(y_test), list(encoder.classes_), config
@@ -70,6 +73,9 @@ def run_pipeline(config: PipelineConfig, download: bool = False) -> None:
                 "cv_folds": config.cv_folds,
                 "permutation_repeats": config.permutation_repeats,
                 "selected_model": best.name,
+                "model_path": model_path.name,
+                "feature_columns": parts.features.columns.tolist(),
+                "class_names": encoder.classes_.tolist(),
                 "source_path": str(data_path),
                 "data_sha256": sha256_file(data_path),
                 "rows": len(frame),

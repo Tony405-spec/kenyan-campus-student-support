@@ -40,3 +40,29 @@
 
 **Can a university act on it?** Not directly. This dataset and evaluation do not establish causal factors, fairness across groups, temporal generalisation, intervention benefit, or acceptable decision thresholds. Any real use would need governance, privacy controls, subgroup validation, human review and prospective evaluation.
 
+## Application architecture and decision support
+
+**What does the Streamlit app contain?** Eleven views: overview, individual assessment, cohort analysis, support cases, follow-up monitoring, model transparency, data administration, student support home, support chat, study reset and support directory. The wellbeing support and academic outcome model are separate; chat never receives a model prediction.
+
+**Is the chatbot generative AI?** No. It applies ordered regular-expression patterns and returns prepared response text with optional resource links. It has specific Kenyan campus examples (CATs, HELB, upkeep, hostel, anxiety and loneliness) but only limited phrase coverage; it may miss paraphrases and context.
+
+**How does individual assessment run?** The page starts from a synthetic row made from dataset medians and categorical modes. After feature validation it invokes the saved fitted preprocessing/classifier Pipeline and displays class probability estimates for the dataset's recorded labels. The starting row is not an actual person or Kenyan student.
+
+**What is a review band?** It is a transparent rule over the model's estimated dropout probability: routine, consider follow-up or priority human review. The thresholds are adjustable in the interface, provisional, not selected through stakeholder analysis and not calibrated. A band is not a predicted fact, diagnosis or action; a person must review the context.
+
+**How are cases handled?** A staff member can create or update a pseudonymous record with a category, next action, responsible role, status and due date. Atomic JSON replacement reduces the risk of a partially written file, but it does not protect confidentiality. There is no login, encryption, role-based access, audit trail or notification mechanism. The prototype must not store real student data.
+
+**What does follow-up monitoring mean?** It counts open, due, overdue and closed records based on their dates and statuses. These are workflow indicators only; they do not measure whether a support intervention worked.
+
+**What Kenyan resources are linked?** The app points to emergency numbers 112/999 and online/provider references for LVCT Health, Kenya Red Cross Chat Care and HELB. It does not assert an unverified KCA counselling number; students are directed to their own Student Affairs, Welfare, Dean of Students or department for the current local referral. Provider information should be checked against current official pages.
+
+## Testing and safe interpretation
+
+**What is covered by automated tests?** The 34-test suite covers the existing ETL/modelling modules, chatbot routing, threshold boundaries, saved-model inference contract, case JSON create/update/due behavior, and Streamlit AppTest routes. UI tests are not a substitute for actual student usability evaluation or clinical review.
+
+**Why use a local joblib artifact?** The trained Pipeline preserves the fitted encoding/scaling and estimator together, reducing train/serve mismatch. Joblib deserialization can execute code, so the app only loads the locally generated trusted artifact; do not load arbitrary files.
+
+**Can the threshold be treated as a clinical cutoff?** No. Neither the model probabilities nor bands are calibrated and no acceptable threshold has been set with students, advisers, counsellors or institutional leaders. Prospective evaluation and documented error costs are prerequisites even for a limited pilot.
+
+**How should this become Kenyan-campus appropriate?** Co-design examples, language and referrals with Kenyan students and qualified support staff, then obtain appropriate approval and representative local data. Validate subgroup performance, calibration, privacy, accessibility, time ordering and intervention benefit before any operational use. Keep a human accountable for follow-up and crisis escalation.
+

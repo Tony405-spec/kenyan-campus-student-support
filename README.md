@@ -1,44 +1,65 @@
-# University Dropout Prediction Pipeline
+# Karibu Campus: Student Support and Academic Outcome Prototype
 
-Course project for CPP 4201, KCA University. This repository extracts, validates, transforms, compares and evaluates three classifiers for the UCI 697 three-class recorded outcome (`Dropout`, `Enrolled`, `Graduate`). It is reproducible coursework, not a deployed student-risk system.
+Course project for CPP 4201, KCA University. The repository combines two separate components: a reproducible model pipeline for the public UCI student-outcome dataset and a Kenyan university campus support prototype. The model dataset comes from a Portuguese institution; its estimates are not validated for Kenyan universities. The app is not clinical care, an operational early-warning system or an automated decision service.
 
-## Setup and run
+## Features
+
+- **Student support hub:** Kenyan-campus entry page, optional session-only check-in, intent-based chat, study-reset planner and support directory.
+- **Eleven Streamlit views:** Home, Individual Assessment, Cohort Analysis, Support Cases, Follow-up Monitoring, Model Transparency, Data & Administration, Student Support Home, Support Chat, Study Reset and Support Directory.
+- **Model-backed assessment:** a fitted scikit-learn Pipeline is saved locally and used for a clearly synthetic profile. Adjustable probability review bands are provisional and require human review.
+- **Case-workflow demonstration:** pseudonymous local JSON records can be created, updated and monitored. This has no authentication or production security; do not use real student records.
+- **Reproducible analysis:** extraction and validation, preprocessing inside cross-validation, comparison of three classifiers, held-out evaluation and saved artifacts.
+
+The chatbot uses deterministic regular-expression intent routing and prepared replies, not an LLM. It covers academic/exam pressure, fees/HELB, anxiety/worry, loneliness, low mood, greetings and immediate-safety signposting. It does not diagnose or monitor messages.
+
+## Setup
 
 Requires Python 3.11+. From the repository root:
 
-```powershell
+```bash
 python -m pip install -e ".[dev,report,app]"
 python -m dropout_pipeline.cli --download
 python -m streamlit run src/dropout_pipeline/support_app.py
 ```
 
-The first command installs the package, development tools, report generator and Streamlit app dependencies. The second downloads the official UCI ZIP to `data/raw/`, extracts `data.csv`, validates it, performs stratified 5-fold CV on the 80% training partition, selects by mean macro-F1, and evaluates the selected model once on the untouched 20% test partition. To reuse a local CSV, use `python -m dropout_pipeline.cli --data data/raw/data.csv`. The third command starts the Kenyan campus support app. Open the local URL printed by Streamlit, normally `http://localhost:8501`.
+Open the local URL printed by Streamlit, normally `http://localhost:8501`. To use an existing CSV instead of downloading:
 
-Outputs are written to `outputs/`: model comparison, CV summary, held-out metrics/report, confusion matrix, permutation importance, run config, and a concise interpretation. Raw data and generated outputs are ignored by Git; their provenance and generated examples are described in `data/raw/README.md` and `outputs/README.md`.
+```bash
+python -m dropout_pipeline.cli --data data/raw/data.csv
+```
 
-## Development commands
+The first modelling run downloads the official UCI archive, validates the data, compares the three classifiers using stratified five-fold cross-validation and evaluates the selected model once on a held-out test partition. It saves the trained model and report artifacts in `outputs/`. Downloaded data and generated outputs are ignored by Git; run the pipeline to reproduce them. See [data provenance](data/raw/README.md) and [artifact notes](outputs/README.md).
 
-```powershell
+## GitHub Codespaces
+
+Install the dependencies above in a Codespaces terminal, then run:
+
+```bash
+python -m streamlit run src/dropout_pipeline/support_app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+Open the forwarded port `8501` in the Codespaces **Ports** panel. To enable model assessment and analytics, prepare artifacts with `python -m dropout_pipeline.cli --download` in another terminal and refresh the app.
+
+## Development checks
+
+```bash
 python -m pytest
 ruff check .
 ruff format --check .
 mypy src/
-python -m dropout_pipeline.cli --help
 ```
 
-The updated Kenyan campus report and demonstration guide are in `docs/`. Report source and PDF are in `docs/report/`. A plain-language concept map and viva notes are also in `docs/`.
+## Documentation
 
-## Experimental design
+- [Step-by-step setup and demo guide](docs/demo_guide.md)
+- [20-page project report PDF](docs/report/Advanced_Python_Dropout_Prediction_Report.pdf) and [editable source](docs/report/Advanced_Python_Dropout_Prediction_Report.md)
+- [Concept map](docs/concept_map.md), [methodology](docs/methodology.md), [project design](docs/project_design.md) and [viva notes](docs/viva_preparation.md)
+- Genuine app screenshots are under `docs/report/screenshots/`.
 
-Nominal integer category codes use one-hot encoding; numeric measurements and counts use standardisation. All fitted transformations live in sklearn pipelines and are learned within training folds. Stratification preserves class proportions. Macro-F1 is the comparison metric because each outcome class receives equal weight. Accuracy is reported as a secondary metric. Models are balanced Logistic Regression, balanced Random Forest, and Gradient Boosting (which does not expose the same class-weight setting). Details and limitations are in `docs/methodology.md` and the report.
+## Dataset and limitations
 
-The data contains second-semester academic performance. Those records may be available only near or after the recorded outcome is determined. Results therefore cannot be interpreted as an early prediction or as causal factors. The separate Streamlit app provides deterministic intents for academic/exam pressure, financial stress, anxiety, loneliness, low mood/depression, greetings, general support and immediate safety signposting. It is not a diagnostic or generative AI system.
+The target is the UCI dataset's recorded three-class outcome (`Dropout`, `Enrolled`, `Graduate`). A held-out result describes performance on a random test partition from that dataset, not prediction for a Kenyan campus. Semester features may be recorded too late to support early intervention. The student-support content is generic signposting and must be checked against current campus referral routes and provider details. Do not enter personal or sensitive student data into the prototype.
 
 ## Group
 
-Tony Kenga (24/03652) · Baraka Blessings (24/04272)
-
-
-## Kenyan campus support app documentation
-
-The localized support app is a deterministic, intent-based Streamlit experience. The concise 20-page report is in `docs/report/Advanced_Python_Dropout_Prediction_Report.pdf`; the step-by-step demonstration guide is in `docs/demo_guide.md`. Both are included in the downloadable project bundle.
+Tony Kenga (24/03652) · Baraka Blessings (24/04272) · Linet Maina (24/00632)

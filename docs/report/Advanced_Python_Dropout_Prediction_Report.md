@@ -7,6 +7,7 @@ CPP 4201 - Advanced Python Programming
 **Group members**  
 Tony Kenga - 24/03652  
 Baraka Blessings - 24/04272
+Linet Maina - 24/00632
 
 **Academic project report**  
 21 October 2026
@@ -18,7 +19,7 @@ This project develops a reproducible Python workflow for extracting, validating 
 
 The inspected file has 4,424 records, 36 predictors and one target. A defensive validation stage checks format, row widths, schema, missingness, duplicate observations and target labels. A stratified 80/20 split reserves 885 records for final evaluation. Three scikit-learn pipelines compare Logistic Regression, Random Forest and Gradient Boosting using five-fold stratified cross-validation on training data. The selected Logistic Regression model achieved mean training cross-validation macro-F1 of 0.705 (standard deviation 0.030), then held-out macro-F1 of 0.716 and accuracy of 0.756.
 
-The project now also includes a separate Streamlit demonstration for Kenyan campus support. Its rule-based chatbot routes academic and CAT pressure, financial stress, anxiety, loneliness, low mood and immediate-safety language to fixed responses and Kenyan signposting. It is not connected to model predictions, does not diagnose, and does not send student text to a generative AI service. This distinction lets the project demonstrate student-centred support without presenting retrospective academic labels as wellbeing measurements.
+The project now also includes a Kenyan-context student-success decision-support prototype. The Streamlit application offers a data-backed cohort overview, individual synthetic-profile assessment using the saved fitted pipeline, descriptive cohort analysis, provisional human-review bands, pseudonymous case creation and updates, follow-up monitoring, model transparency and data-quality inspection. A separate Student Support hub retains the localized intent chat, study reset and verified resource directory. The model is not validated for Kenya; the workflow requires human review and does not diagnose or make institutional decisions.
 
 The code demonstrates typed modular functions, dataclasses, a Protocol, an Enum, context managers, a lazy generator, bounded retry decoration, pattern matching, logging, custom exceptions and pytest. Semester performance features rank highest in permutation analysis; they also restrict any interpretation as an early warning. Predictions describe recorded outcomes, not causes or guaranteed future behaviour.
 
@@ -102,17 +103,19 @@ The target is separated from predictors before the split. No observations are re
 <!-- PAGE -->
 # 8. System architecture and Kenyan campus interface
 
-The implementation is an installable `src`-layout package. `extract.py` downloads and safely extracts the UCI archive. `validate.py` reads the semicolon CSV and enforces schema and value rules. `transform.py` separates predictors and outcome and builds a column-wise preprocessing transformer. `model.py` defines the three candidates and performs training-only cross-validation. `evaluate.py` reports final metrics and figures. `cli.py` orchestrates the stages and saves run metadata. The separate `support_chatbot.py` contains intent patterns and fixed responses; `support_app.py` presents chat, resource and outcome-results pages using Streamlit.
+The implementation is an installable `src`-layout package. `extract.py` downloads and safely extracts the UCI archive. `validate.py` reads the semicolon CSV and enforces schema and value rules. `transform.py` separates predictors and outcome and builds a column-wise preprocessing transformer. `model.py` defines the three candidates and performs training-only cross-validation. `evaluate.py` reports final metrics and figures. `cli.py` orchestrates training and saves a fitted model artifact and run metadata. The separate `support_chatbot.py` contains intent patterns and fixed responses. The Streamlit application exposes eleven views: Home, Individual Assessment, Cohort Analysis, Support Cases, Follow-up Monitoring, Model Transparency, Data & Administration, Student Support Home, Support Chat, Study Reset and Support Directory.
 
-Each module has a narrow role. Custom exceptions distinguish download failure, invalid archive, schema mismatch and row validation problems. Logging records progress and warnings. Frozen dataclasses make experiment settings and result records explicit. A small `FrameValidator` Protocol expresses a replaceable validation contract without requiring a framework. The support app is a distinct presentation layer; the rule classifier returns a `SupportReply` containing intent, message and resource keys. Streamlit keeps messages in its active session state and offers a clear-chat control.
+Each module has a narrow role. Custom exceptions distinguish download failure, invalid archive, schema mismatch and row validation problems. Logging records progress and warnings. Frozen dataclasses make experiment settings and result records explicit. A small `FrameValidator` Protocol expresses a replaceable validation contract without requiring a framework. The support app is a distinct presentation layer; the rule classifier returns a `SupportReply` containing intent, message and resource keys. Streamlit keeps messages, the optional check-in and study plan in active session state; users can start a new conversation and session state ends with the session.
 
-The command-line program accepts data/output paths, a random seed and a `--download` flag. The optional Streamlit interface is started separately with `python -m streamlit run src/dropout_pipeline/support_app.py`. Data, model comparison results and configuration are saved in separate files. The results page reads these artifacts; the chatbot never consumes a student's predicted outcome.
+The command-line program accepts data/output paths, a random seed and a `--download` flag. The Streamlit interface starts separately; in Codespaces it listens on port 8501 for port forwarding. Data, a serialized fitted sklearn Pipeline, model comparison results and configuration are saved in separate local files. Assessment uses an explicitly synthetic profile; the chatbot never consumes a predicted outcome and does not call an external generative model.
 
-The coursework does not require a database or cloud deployment. The local app needs Streamlit; the original ETL/model CLI remains independently usable. A text flow is: student message -> ordered regular-expression intent matcher -> fixed safe reply -> optional verified resource links. The model flow remains: UCI archive -> extraction -> validation -> transformation pipeline -> cross-validated model selection -> held-out evaluation -> JSON/PNG artifacts -> results page.
+The coursework does not require a database or cloud deployment. The app needs Streamlit; the ETL/model CLI remains independently usable. The support journey is: optional check-in -> choose chat, study reset or directory -> prepared response or actionable next step -> human support contact where appropriate. The chat flow is: student message -> ordered regular-expression intent matcher -> fixed prepared reply -> support route. The model flow is: UCI archive -> extraction -> validation -> fitted preprocessing/model pipeline -> cross-validated selection -> held-out evaluation -> local model/JSON/PNG artifacts -> assessment and transparency views. Aggregate descriptive analysis and the locally persisted case-workflow demonstration are distinct. These paths share no actual Kenyan student-level predictions.
 
-**Running interface: chatbot welcome and privacy notice**
+`inference.py` validates ordered features, loads the saved local model and applies configurable provisional review bands. `cohort.py` computes cohort summaries and held-out reference counts. `case_management.py` validates and atomically persists pseudonymous case records to JSON. These modules support a human-owned review workflow; the local JSON file has no authentication or security controls and is not suitable for real student records.
 
-[[IMAGE:docs/report/screenshots/01_chat_welcome.png]]
+**Running interface: data-backed overview dashboard and navigation**
+
+[[IMAGE:docs/report/screenshots/00_home.png]]
 
 <!-- PAGE -->
 # 9. ETL validation and failure handling
@@ -125,9 +128,9 @@ Validation is defensive but specific. It checks row widths using a lazy line gen
 
 The CSV and archive are not overwritten with cleaned variants. If a future version of the source contains an anomaly, the validator will fail or log it; the group can decide and document an explicit policy rather than allowing an implicit row deletion to alter the experiment.
 
-**Running interface: Kenyan support resources and campus referral route**
+**Running interface: Kenyan support directory and campus referral route**
 
-[[IMAGE:docs/report/screenshots/03_support_resources.png]]
+[[IMAGE:docs/report/screenshots/11_support_directory.png]]
 
 <!-- PAGE -->
 # 10. Advanced Python concepts I: types, data structures and interfaces
@@ -157,7 +160,7 @@ This does not mean generators are always preferable. Once data is in a DataFrame
 
 `sha256_file` also streams fixed-size chunks. A deterministic content digest supports provenance checks and can reveal if a local copy differs. A checksum identifies exact bytes; it does not prove the source itself is authoritative, which is why the official URL and dataset ID are also documented.
 
-The support app links to Kenyan services and official information: emergency services (112/999), LVCT Health's 1190 counselling information, Kenya Red Cross Chat Care and HELB student FAQs. The app does not invent a KCA-specific counselling number; it directs students to ask Student Affairs, Student Welfare, the Dean of Students or their department for the current referral pathway. Provider pages are the source of current availability.
+The support app links to Kenyan services and official information: emergency services (112/999), LVCT Health's 1190 counselling information, Kenya Red Cross Chat Care and HELB student FAQs. The app does not invent a KCA-specific counselling number; it directs students to ask Student Affairs, Student Welfare, the Dean of Students or their department for the current referral pathway. Provider pages are the source of current availability. The Support Directory presents emergency, counselling, finance and online support in separate sections.
 
 <!-- PAGE -->
 # 12. Advanced Python concepts III: decorators and functional tools
@@ -196,7 +199,7 @@ The model test exercises all three estimators with stratified CV on a small fixt
 
 Ruff provides linting and formatting checks; mypy checks package types. Pre-commit configuration offers consistent local formatting and lint checks. The new chatbot tests cover academic, financial, anxiety, loneliness, low-mood, greeting/thanks and immediate-safety routing, plus resource keys and the financial credential warning. The UI was opened locally and a CAT/revision sample produced the expected `academic_or_exam_pressure` label and advice. That interaction also caught and fixed a missing campus-support link mapping before final verification.
 
-The complete suite now contains 20 passing tests. A verification run reported Ruff clean and mypy success across 12 source modules. Pytest emitted third-party deprecation warnings from installed pytest-asyncio and Matplotlib dependencies, not project test failures. UI checks are manual browser checks; there is no automated end-to-end browser suite, usability study, clinical validation or prospective evaluation.
+The complete automated suite contains 34 passing tests, including unit tests for feature contracts, review-band boundaries and persistent case operations, plus Streamlit AppTest checks for all eleven views and the assessment/case workflows when local artifacts are available. Ruff lint, Ruff format and mypy are configured and were checked during development. The browser screenshots in this report are genuine captures of the running application; they document appearance and interaction, not a student usability study. Pytest may display third-party deprecation warnings from pytest-asyncio and Matplotlib. There has been no clinical validation, prospective evaluation or student usability study.
 
 <!-- PAGE -->
 # 15. Machine-learning protocol
@@ -233,7 +236,7 @@ The comparison CSV and CV JSON preserve the exact generated values. No metric in
 
 **Running interface: held-out results page (displayed values are project outputs)**
 
-[[IMAGE:docs/report/screenshots/04_outcome_results.png]]
+[[IMAGE:docs/report/screenshots/06_model_transparency.png]]
 
 <!-- PAGE -->
 # 18. Results: class outcomes and importance
@@ -246,18 +249,22 @@ Second-semester approved units had mean permutation macro-F1 decrease 0.203; fir
 
 The figures below and the CSV artifacts are generated by the pipeline from actual execution.
 
-[[IMAGE:outputs/confusion_matrix.png]]
+[[IMAGE:docs/report/screenshots/12_confusion_matrix.png]]
 
-[[IMAGE:outputs/permutation_importance.png]]
+[[IMAGE:docs/report/screenshots/13_permutation_importance.png]]
 
 <!-- PAGE -->
 # 19. Kenyan campus adaptation, reproducibility and limitations
 
-Kenyan campus examples include CATs, revision backlogs, fee balances, HELB/HEF, bursary referrals, rent/hostel costs, transport fare, upkeep, anxiety, loneliness and low mood. The advice favours realistic next steps: a short study block and peer/lecturer support; campus finance/student-affairs referral; grounding plus human help for persistent worry; and manageable social contact. Messages remain general and active-session-only, with a clear-chat control. No student identifiers should be submitted.
+Kenyan campus examples include CATs, revision backlogs, fee balances, HELB/HEF, bursary referrals, rent/hostel costs, transport fare, upkeep, anxiety, loneliness and low mood. The advice favours realistic next steps: a short study block and peer/lecturer support; campus finance/student-affairs referral; grounding plus human help for persistent worry; and manageable social contact. The Student Support hub has a session-only check-in, intent chat, a study planner with grounding steps, and local resource links. The decision-support pages use aggregate outcomes and synthetic inputs; they make no automatic student decisions.
 
 Resources link to official or provider information for emergency services (112/999), LVCT Health's 1190 counselling line, Kenya Red Cross Chat Care and HELB student FAQs. Campus-specific guidance says to ask Student Affairs, Student Welfare, the Dean of Students or a department for the current referral. The project does not assert a verified KCA counselling telephone number. The app is not monitored; it directs immediate danger toward emergency help and a trusted person, not a delayed chatbot response.
 
-The package specifies Python 3.11+, dependencies and CLI/app entry commands. A fixed random seed, configuration JSON and dataset SHA-256 make the experiment traceable. The full suite passed 20 tests; Ruff and mypy checks passed on the corrected source. The manually inspected Streamlit session verified the chat flow and localized intent response. There has been no clinical validation, student usability study or automated browser test.
+The Individual Assessment page constructs a synthetic starting profile from observed medians and categorical modes, then permits editing of the original 36 UCI inputs. It applies the saved scikit-learn preprocessing/model Pipeline and shows the predicted recorded class and model probabilities. Provisional probability thresholds group a result into Routine review, Consider follow-up or Priority human review; the probabilities are not calibrated and thresholds are not institutionally validated. A person must review the evidence before deciding whether follow-up is appropriate.
+
+The Support Cases workflow records a pseudonymous reference, review date, concern category, reason, next action, responsible role, due date, status and short administrative note. The JSON file is written atomically under ignored local `outputs/` storage. Staff can create, update, filter and monitor open, due, overdue and closed cases. This is an unprotected local demonstration file, not a secure student-information system. Case status measures workflow completion only; it does not establish intervention effectiveness.
+
+The package specifies Python 3.11+, dependencies and CLI/app entry commands. A fixed random seed, configuration JSON and dataset SHA-256 make the experiment traceable. The final automated suite passed 34 tests, with Ruff lint and format checks and mypy also passing. Streamlit AppTest covered all eleven application views, a synthetic-profile assessment and a pseudonymous case-creation workflow. Browser captures show actual rendered application pages. There has been no clinical validation or student usability study.
 
 The outcome model is limited by a single source cohort, random rather than temporal split, class imbalance, feature dependence and no subgroup evaluation. Second-semester features may be close to the recorded outcome. It is not a validated early-warning system. The chatbot has limited regular-expression vocabulary, does not interpret context reliably and cannot provide clinical assessment. A future deployment would need local student and counsellor co-design, approved referral contacts, privacy/security review, accessibility and language evaluation, escalation ownership, consent, and evaluation with qualified professionals. Neither component should decide eligibility, discipline, funding or clinical care.
 
@@ -266,7 +273,7 @@ The outcome model is limited by a single source cohort, random rather than tempo
 
 The project now combines a reproducible academic-outcome pipeline with a separate Kenyan campus support prototype. The pipeline downloads and validates the public UCI dataset, keeps preprocessing inside cross-validated pipelines, compares three multiclass models and writes reproducible artifacts. Logistic Regression achieved held-out macro-F1 0.716 and accuracy 0.756; Enrolled remained its weakest class. Academic progress features dominate the permutation ranking, but their timing rules out an early-warning claim.
 
-The campus app demonstrates deterministic intent routing for exam pressure, money stress, anxiety, low mood, loneliness and immediate safety, with Kenyan resource links and explicit limits. It does not connect personal text to prediction results or diagnose a student. Key viva points are cross-validation leakage, macro-F1 under class imbalance, categorical encoding, predictive versus causal importance, regex intent order, resource verification and the need for human-owned escalation. The work is a coursework prototype, not an operational intervention.
+The application now combines an observed-cohort dashboard, synthetic-profile model inference, descriptive cohort comparisons, explicit human-review priority bands, locally persisted support cases and follow-up monitoring with a Kenyan student-support hub. Its saved model is a real fitted scikit-learn Pipeline; the probability outputs and review bands are not calibrated or validated for Kenya. Key viva points include cross-validation leakage, macro-F1 under class imbalance, categorical encoding, domain shift, predictive versus causal importance, transparent thresholds, local-file security, regex intent order, resource verification and the need for human-owned escalation. The work is a coursework prototype, not a production early-warning service.
 
 ## References
 

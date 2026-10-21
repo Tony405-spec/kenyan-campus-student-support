@@ -49,11 +49,14 @@ def _make_page(block: str, styles: dict[str, ParagraphStyle]) -> list[object]:
         elif line.startswith("[[IMAGE:"):
             path = ROOT / line[8:-2]
             image = Image(str(path))
-            image._restrictSize(3.8 * inch, 2.55 * inch)
+            if path.name == "00_home.png":
+                image._restrictSize(3.0 * inch, 1.9 * inch)
+            else:
+                image._restrictSize(3.8 * inch, 2.55 * inch)
             image.hAlign = "CENTER"
             story.extend([Spacer(1, 3), image, Spacer(1, 4)])
         elif line.startswith("# "):
-            is_cover = block.startswith("# Predicting University Dropout")
+            is_cover = block.startswith("# Kenyan Campus Student Support")
             story.append(
                 Paragraph(_inline(line[2:]), styles["title"] if is_cover else styles["h1"])
             )
@@ -145,7 +148,7 @@ def build() -> None:
         topMargin=0.62 * inch,
         bottomMargin=0.7 * inch,
         title=("Kenyan Campus Student Support and Outcome Modelling"),
-        author="Tony Kenga; Baraka Blessings",
+        author="Tony Kenga; Baraka Blessings; Linet Maina",
     )
     story: list[object] = []
     for index, block in enumerate(blocks):
