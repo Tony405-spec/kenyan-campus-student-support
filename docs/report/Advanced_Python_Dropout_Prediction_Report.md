@@ -5,9 +5,9 @@ Bachelor of Science in Data Science
 CPP 4201 - Advanced Python Programming
 
 **Group members**  
-Tony Kenga - 24/03652  
-Baraka Blessings - 24/04272
-Linet Maina - 24/00632
+Tony Kenga
+Baraka Blessings
+Linet Maina
 
 **Academic project report**  
 21 October 2026
